@@ -1178,5 +1178,45 @@ function init(){
 if(typeof drawSpr!=='undefined')init();else addEventListener('load',init);
 })();
 </script>
+  <!-- ===== 📱 تنبيه "لفّي الموبايل" + تسريع المقدمة بالضغط ===== -->
+<style>
+#rotateHint{position:absolute;inset:0;z-index:300;background:#0b0a12;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.2em;text-align:center;padding:2em}
+#rotateHint .ph{width:2.2em;height:4em;border:.28em solid #ffcf3f;border-radius:.5em;animation:rot 1.6s ease-in-out infinite}
+@keyframes rot{0%,25%{transform:rotate(0)}65%,100%{transform:rotate(90deg)}}
+#rotateHint .rt{font-family:'Press Start 2P';font-size:.65em;color:#ffcf3f;line-height:2}
+#rotateHint .rs{font-size:1.5em;color:#9d92c4;line-height:1.2}
+#rotateHint .skip{background:none;border:0;color:#6f6695;font-family:'VT323',monospace;font-size:1.3em;text-decoration:underline;cursor:pointer;padding:.5em}
+</style>
+<div id="rotateHint">
+  <div class="ph"></div>
+  <div class="rt">ROTATE YOUR PHONE</div>
+  <div class="rs">اللعبة عرضية 🎮<br>لفّي الموبايل عشان تكمّلي عادي</div>
+  <button class="skip" id="rotSkip">أكملي بالشكل ده على أي حال</button>
+</div>
+<script>
+(function(){
+'use strict';
+if(window.__efpRot)return;window.__efpRot=true;
+var hint=document.getElementById('rotateHint');
+var dismissed=false;
+function check(){
+  var portrait=window.innerHeight>window.innerWidth;
+  hint.style.display=(portrait&&!dismissed)?'flex':'none';
+}
+addEventListener('resize',check);
+addEventListener('orientationchange',function(){dismissed=false;setTimeout(check,200)});
+document.getElementById('rotSkip').addEventListener('click',function(){dismissed=true;check()});
+document.getElementById('scr-intro').addEventListener('pointerdown',function(){
+  var b=document.getElementById('bProve');
+  if(b&&b.style.visibility!=='visible'){
+    document.getElementById('inLine1').textContent="You said you'll start tomorrow...";
+    document.getElementById('inLine2').textContent='TOMORROW HAS ARRIVED.';
+    document.getElementById('car1').style.display='none';
+    b.style.visibility='visible';
+  }
+});
+check();
+})();
+</script>
 </body>
 </html>
