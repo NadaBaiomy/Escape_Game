@@ -1013,5 +1013,83 @@ function loop(t){const dt=Math.min(.033,(t-last)/1000||.016);last=t;
  requestAnimationFrame(loop)}
 requestAnimationFrame(loop);
 </script>
+  <!-- ===== إيقاف مؤقت ⏸ ===== -->
+<style>
+#pauseBtn{position:absolute;top:.8em;left:.8em;z-index:150;font-family:'Press Start 2P';font-size:.42em;background:#1d1930;color:#f4eede;border:.2em solid #f4eede;padding:.55em .9em;cursor:pointer;display:none}
+#pauseBtn:hover{background:#2b2547}
+#pauseCount{font-family:'Press Start 2P';font-size:2.6em;color:#ffcf3f;min-height:1.2em;margin:.5em 0 .2em;text-align:center}
+</style>
+<script>
+(function(){
+'use strict';
+if(window.__efpPause)return;window.__efpPause=true;
+
+/* زرار PAUSE + شاشة الإيقاف */
+document.getElementById('stage').insertAdjacentHTML('beforeend',
+'<button id="pauseBtn">PAUSE</button>'+
+'<div id="scr-pause" class="scr"><div class="pbox" style="text-align:center">'+
+'<div class="ct">PAUSED</div>'+
+'<div class="cs">breathe. the obstacles will wait. (they would love that.)</div>'+
+'<div id="pauseCount"></div>'+
+'<div class="hbtns" id="pauseBtns">'+
+'<button class="btn" id="pResume">RESUME</button>'+
+'<button class="btn ghost" id="pRestart">RESTART LEVEL</button>'+
+'<button class="btn ghost" id="pQuit">QUIT TO ROOM</button>'+
+'</div></div></div>');
+
+var counting=null;
+
+function pauseGame(){
+ if(!G||!G.running||G.frozen||G.sleepT>0||G.paused)return;
+ G.paused=true;stopMusic();SFX.click();
+ document.getElementById('pauseCount').textContent='';
+ document.getElementById('pauseBtns').style.display='flex';
+ document.getElementById('mob').classList.remove('on');
+ showScreen('#scr-pause');
+}
+function resumeGame(){
+ if(!G||!G.paused||counting)return;
+ document.getElementById('pauseBtns').style.display='none';
+ var cnt=document.getElementById('pauseCount'),n=3;
+ cnt.textContent=n;beep(440,.09,'square',.05);
+ counting=setInterval(function(){
+  n--;
+  if(n>0){cnt.textContent=n;beep(440,.09,'square',.05)}
+  else{clearInterval(counting);counting=null;cnt.textContent='';
+   G.paused=false;showScreen(null);
+   document.getElementById('mob').classList.add('on');
+   if(G.running&&G.lvlDef)music(G.lvlDef.mus);
+   beep(880,.12,'square',.05)}
+ },700);
+}
+
+/* تجميد القفز والمشهد وقت الوقف */
+var _doJump=doJump;doJump=function(){if(G&&G.paused)return;_doJump()};
+var _gameFrame=gameFrame;gameFrame=function(dt){if(G&&G.paused)return;_gameFrame(dt)};
+
+/* الزرار يظهر مع اللعب ويختفي في القوائم */
+var _showScreen=showScreen;showScreen=function(id){_showScreen(id);
+ var pb=document.getElementById('pauseBtn');
+ if(pb)pb.style.display=(id===null)?'block':'none'};
+
+/* P أو ESC = وقف / كمّلي */
+addEventListener('keydown',function(e){
+ if(e.repeat)return;
+ if(e.code!=='Escape'&&e.code!=='KeyP')return;
+ if(APP.mode!=='game'||!G||!G.running)return;
+ e.preventDefault();
+ if(G.paused)resumeGame();else pauseGame();
+});
+
+document.getElementById('pauseBtn').addEventListener('click',pauseGame);
+document.getElementById('pResume').addEventListener('click',resumeGame);
+document.getElementById('pRestart').addEventListener('click',function(){if(counting)return;SFX.click();startLevel(G.lvl)});
+document.getElementById('pQuit').addEventListener('click',function(){if(counting)return;SFX.click();G.paused=false;goRoom()});
+
+/* تحديث تعليمات شاشة البداية */
+var ft=document.querySelector('#scr-title .foot');
+if(ft)ft.innerHTML='SPACE / TAP = jump · DOWN = duck · P / ESC = pause<br>collect coffee · dodge the feed · reach the goal';
+})();
+</script>
 </body>
 </html>
