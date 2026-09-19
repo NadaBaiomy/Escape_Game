@@ -1218,5 +1218,28 @@ document.getElementById('scr-intro').addEventListener('pointerdown',function(){
 check();
 })();
 </script>
+  <!-- ===== 🔧 إصلاح شاشة المقدمة: الجمجمة كانت بتغطي زرار PROVE IT ===== -->
+<style>
+#introSk{transform:none !important;width:12em;height:10.8em;flex:0 0 auto;margin:1.1em auto .7em}
+#bProve{position:relative;z-index:5;margin-top:.3em}
+#scr-intro{padding:1em}
+@media (max-height:340px){
+ #introSk{width:8.5em;height:7.65em;margin:.6em auto .4em}
+ .inT{font-size:.65em !important;min-height:2.2em !important}
+ .inS{font-size:.85em !important;min-height:1.6em !important;margin-top:.6em !important}
+ #bProve{padding:.7em 1.1em}
+}
+</style>
+<script>
+(function(){
+'use strict';
+if(window.__efpIntroFix)return;window.__efpIntroFix=true;
+/* لمسة واحدة في أي حتة في الشاشة = تدوسي PROVE IT تلقائي */
+document.getElementById('scr-intro').addEventListener('pointerdown',function(e){
+ var b=document.getElementById('bProve');
+ if(b&&b.style.visibility==='visible'&&!b.contains(e.target)){e.preventDefault();b.click()}
+},true);
+})();
+</script>
 </body>
 </html>
