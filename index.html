@@ -1091,5 +1091,90 @@ var ft=document.querySelector('#scr-title .foot');
 if(ft)ft.innerHTML='SPACE / TAP = jump · DOWN = duck · P / ESC = pause<br>collect coffee · dodge the feed · reach the goal';
 })();
 </script>
+  <!-- ===== APP MODE: لوجو + اسم ESCAPE GAME على الشاشة الرئيسية ===== -->
+<style>
+#appFiles{position:absolute;bottom:.7em;right:.7em;z-index:140;display:flex;gap:.45em}
+#appFiles button{font-family:'Press Start 2P';font-size:.4em;background:rgba(29,25,48,.65);color:#8d83b5;border:.18em solid #3a3350;padding:.5em .8em;cursor:pointer}
+#appFiles button:hover{color:#f4eede;border-color:#f4eede}
+#installHint{font-size:1.05em;color:#6f6695;text-align:center;margin-top:.6em}
+</style>
+<script>
+(function(){
+'use strict';
+if(window.__efpApp)return;window.__efpApp=true;
+
+/* لوجو اللعبة: جمجمة بتاج + ESCAPE */
+var FONT={E:['111','100','110','100','111'],S:['111','100','111','001','111'],
+ C:['111','100','100','100','111'],A:['111','101','111','101','101'],P:['111','101','111','100','100']};
+var CROWN=['Y...Y...Y','Y..YYY..Y','YYYYYYYYY','yYYYYYYYy'];
+
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);
+ c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+
+function word(c,s,x,y,px,col,sh){
+ for(var i=0;i<s.length;i++){var m=FONT[s[i]];if(!m)continue;
+  for(var r=0;r<5;r++)for(var k=0;k<3;k++)if(m[r][k]==='1'){
+   if(sh){c.fillStyle=sh;c.fillRect(x+i*4*px+k*px+px*.3,y+r*px+px*.3,px,px)}
+   c.fillStyle=col;c.fillRect(x+i*4*px+k*px,y+r*px,px,px)}}
+}
+
+function drawIcon(size){
+ var cv=document.createElement('canvas');cv.width=cv.height=size;
+ var c=cv.getContext('2d'),u=size/512;
+ var g=c.createLinearGradient(0,0,0,size);g.addColorStop(0,'#262646');g.addColorStop(1,'#120f20');
+ c.fillStyle=g;c.fillRect(0,0,size,size);
+ rr(c,12*u,12*u,488*u,488*u,38*u);c.strokeStyle='#ffcf3f';c.lineWidth=13*u;c.stroke();
+ drawSpr(c,CROWN,null,139*u,52*u,26*u);
+ drawSpr(c,SKULL,{K:'#ff5f5f'},126*u,152*u,26*u);
+ drawSpr(c,HEART,null,36*u,252*u,9*u);
+ drawSpr(c,HEART,null,413*u,252*u,9*u);
+ word(c,'ESCAPE',95*u,412*u,14*u,'#ffcf3f','#0b0a12');
+ return cv;
+}
+
+function init(){
+ var i192=drawIcon(192).toDataURL('image/png');
+ var i512=drawIcon(512).toDataURL('image/png');
+ function meta(n,v){var m=document.createElement('meta');m.name=n;m.content=v;document.head.appendChild(m)}
+ meta('theme-color','#0b0a12');
+ meta('apple-mobile-web-app-capable','yes');
+ meta('apple-mobile-web-app-status-bar-style','black-translucent');
+ meta('apple-mobile-web-app-title','ESCAPE GAME');
+ var touch=document.createElement('link');touch.rel='apple-touch-icon';touch.href=i192;
+ document.head.appendChild(touch);
+ if(!document.querySelector('link[rel="manifest"]')){
+  var here=location.href.split('#')[0].split('?')[0];
+  var dir=here.slice(0,here.lastIndexOf('/')+1);
+  var man={name:'ESCAPE GAME',short_name:'ESCAPE GAME',
+   description:'Escape from Procrastination - a tiny runner about finally starting.',
+   start_url:here,scope:dir,display:'standalone',orientation:'landscape',
+   background_color:'#0b0a12',theme_color:'#0b0a12',
+   icons:[{src:i192,sizes:'192x192',type:'image/png'},
+          {src:i512,sizes:'512x512',type:'image/png',purpose:'any'}]};
+  var l=document.createElement('link');l.rel='manifest';
+  l.href='data:application/manifest+json,'+encodeURIComponent(JSON.stringify(man));
+  document.head.appendChild(l);
+ }
+ try{fetch('icon-512.png',{method:'HEAD'}).then(function(r){if(r.ok)touch.href='icon-512.png'}).catch(function(){})}catch(e){}
+ /* زراير تنزيل اللوجو — بتظهر في ركن شاشة البداية */
+ var wrap=document.createElement('div');wrap.id='appFiles';
+ ['192','512'].forEach(function(s){
+  var b=document.createElement('button');b.textContent='⬇'+s;
+  b.addEventListener('click',function(){
+   if(window.SFX)SFX.click();
+   var a=document.createElement('a');a.download='icon-'+s+'.png';
+   a.href=drawIcon(+s).toDataURL('image/png');
+   document.body.appendChild(a);a.click();a.remove();
+  });
+  wrap.appendChild(b);
+ });
+ document.getElementById('scr-title').appendChild(wrap);
+ var f=document.querySelector('#scr-title .foot');
+ if(f){var h=document.createElement('div');h.id='installHint';
+  h.textContent='make it an app: browser menu \u22EE \u2192 Add to Home Screen';f.appendChild(h)}
+}
+if(typeof drawSpr!=='undefined')init();else addEventListener('load',init);
+})();
+</script>
 </body>
 </html>
